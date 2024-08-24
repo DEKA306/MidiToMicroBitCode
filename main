@@ -1,0 +1,73 @@
+import mido
+import pyperclip
+
+def print_channel_data(messages, channel):
+    print(f"\nChannel {channel} data:")
+    for msg in messages:
+        if msg.type in ['note_on', 'note_off']:
+            print(f"Type: {msg.type}, Note: {msg.note}, Velocity: {msg.velocity}, Time: {msg.time}")
+
+# MIDI 파일 열기
+midi_file = mido.MidiFile('qqq.mid')
+
+# 채널 1과 채널 2의 데이터를 저장할 리스트
+channel_1_data = []
+
+
+# 각 트랙에서 채널 데이터를 추출
+for track in midi_file.tracks:
+    for msg in track:
+        if msg.type in ['note_on', 'note_off']:  # 노트 온/오프 메시지만 처리
+            if msg.channel == 0:  # 채널 1
+                channel_1_data.append(msg)
+        elif msg.type == 'set_tempo':
+            qw=mido.tempo2bpm(msg.tempo)
+            
+
+
+# 채널 1과 채널 2의 데이터를 출력
+#print_channel_data(channel_1_data, 0)
+# 리스트가 비어 있지 않은지 확인하고 첫 번째 메시지를 가져오기
+asdf=[]
+qwer=[]
+
+for i in channel_1_data:
+    asdf.append(str(i).split())
+for i in asdf:
+    a = []
+    a.append(str(440 * 2 ** ((int(i[2][5:]) - 69) / 12)))
+    a.append(i[3][9:])
+    if i[4][5:] == '1':
+        a.append('0')
+    else:
+        a.append(i[4][5:])
+    qwer.append(a)
+
+a=0
+b = 1
+al =[]
+al.append("music.set_volume(255)")
+delay=0
+if a == 0:
+    
+    for i in qwer:
+        i[2]=str(int(i[2]))
+        if b==0:
+            al.append("music.ring_tone("+i[0]+')')
+            if delay==0:
+                al.append("basic.pause("+str((float(i[2])/480)*(60000/int(qw)))+')')
+            else:
+                al.append("basic.pause("+str((float(i[2])/480)*(60000/int(qw))-delay)+')')
+            al.append('music.stop_all_sounds()')
+            al.append('basic.pause('+str(delay)+')')
+            b=1
+        elif b==1:
+            b=0
+        
+if a==2:
+    for i in al:
+        print(i)
+
+zxcv = "\n".join(al)
+pyperclip.copy(zxcv)
+print("copyed!")
